@@ -37,9 +37,15 @@ async def root(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...), pages: str = Form(None), duplex: bool = Form(False)):
+async def upload_file(file: UploadFile = File(...), pages: str = Form(None)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
+    
+    # Validate page range format if provided
+    if pages:
+        import re
+        if not re.match(r'^[\d\s\-,]+$', pages):
+            raise HTTPException(status_code=400, detail="Invalid page range format")
     
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     
@@ -55,23 +61,26 @@ async def upload_file(file: UploadFile = File(...), pages: str = Form(None), dup
             if pages:
                 # -P specifies page ranges (e.g., 1-3, 5, 7-10)
                 cmd.extend(["-P", pages])
-            
-            if duplex:
-                # -o sides=two-sided-long-edge for double-sided printing
-                cmd.extend(["-o", "sides=two-sided-long-edge"])
                 
             cmd.append(file_path)
             
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             print_status = f"Printed successfully: {result.stdout}"
         except subprocess.CalledProcessError as e:
-            print_status = f"Print failed: {e.stderr}"
+            error_msg = e.stderr.strip()
+            if "No pages were selected" in error_msg:
+                print_status = "Invalid page range: The document doesn't have those pages."
+            elif "sides" in error_msg or "option" in error_msg:
+                print_status = f"Printer error: {error_msg}. Your printer might not support two-sided printing."
+            else:
+                print_status = f"Print failed: {error_msg}"
+            
             raise HTTPException(status_code=500, detail=print_status)
         except FileNotFoundError:
-            # If 'lp' command is not found (e.g. running on Windows or Mac without CUPS configured)
+            # If 'lp' command is not found
             print_status = "Print simulated (lp command not found)"
             
-        return JSONResponse(content={"message": "File processed successfully", "status": print_status, "filename": file.filename})
+        return JSONResponse(content={"message": "Process complete", "status": print_status, "filename": file.filename})
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

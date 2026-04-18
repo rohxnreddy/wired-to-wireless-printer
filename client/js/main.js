@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pageSelection = document.getElementById('page-selection');
     const customPagesInput = document.getElementById('custom-pages-input');
-    const duplexSelection = document.getElementById('duplex-selection');
 
     // Handle page selection toggle
     pageSelection.addEventListener('change', () => {
@@ -140,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pageSelection.value = 'all';
         customPagesInput.value = '';
         customPagesInput.classList.add('hidden');
-        duplexSelection.value = 'false';
         
         hideStatus();
     });
@@ -162,12 +160,24 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('file', currentFile);
         
         // Add page range if custom is selected
-        if (pageSelection.value === 'custom' && customPagesInput.value.trim()) {
-            formData.append('pages', customPagesInput.value.trim());
+        if (pageSelection.value === 'custom') {
+            const pages = customPagesInput.value.trim();
+            if (!pages) {
+                showStatus('Please enter a page range.', 'error');
+                resetPrintBtn(originalContent);
+                return;
+            }
+            
+            // Basic validation for page range: digits, commas, and dashes only
+            const pageRangeRegex = /^[\d\s\-,]+$/;
+            if (!pageRangeRegex.test(pages)) {
+                showStatus('Invalid page range format. Use numbers, commas, or dashes (e.g. 1-5, 8).', 'error');
+                resetPrintBtn(originalContent);
+                return;
+            }
+            
+            formData.append('pages', pages);
         }
-
-        // Add duplex setting (convert "true"/"false" string to boolean)
-        formData.append('duplex', duplexSelection.value === 'true');
 
         try {
             const response = await fetch('/upload', {
@@ -189,12 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showStatus('Network error occurred. Please try again.', 'error');
         } finally {
-            // Restore button state
-            printBtn.classList.remove('loading');
-            printBtn.innerHTML = originalContent;
-            printBtn.disabled = false;
+            resetPrintBtn(originalContent);
         }
     });
+
+    function resetPrintBtn(originalContent) {
+        printBtn.classList.remove('loading');
+        printBtn.innerHTML = originalContent;
+        printBtn.disabled = false;
+    }
 
     function showStatus(message, type) {
         statusMessage.textContent = message;
