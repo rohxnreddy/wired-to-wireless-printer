@@ -46,16 +46,41 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleFiles(files) {
         if (files.length > 0) {
             currentFile = files[0];
-            showFilePreview(currentFile.name);
+            showFilePreview(currentFile);
         }
     }
 
-    function showFilePreview(filename) {
-        filenameDisplay.textContent = filename;
+    function showFilePreview(file) {
+        filenameDisplay.textContent = file.name;
         uploadArea.classList.add('hidden');
         filePreview.classList.remove('hidden');
         printBtn.disabled = false;
         hideStatus();
+
+        const imagePreview = document.getElementById('image-preview');
+        const pdfPreview = document.getElementById('pdf-preview');
+        const genericPreview = document.getElementById('generic-preview');
+
+        imagePreview.classList.add('hidden');
+        pdfPreview.classList.add('hidden');
+        genericPreview.classList.add('hidden');
+        imagePreview.src = '';
+        pdfPreview.src = '';
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type === 'application/pdf') {
+            const fileURL = URL.createObjectURL(file);
+            pdfPreview.src = fileURL;
+            pdfPreview.classList.remove('hidden');
+        } else {
+            genericPreview.classList.remove('hidden');
+        }
     }
 
     removeBtn.addEventListener('click', () => {
