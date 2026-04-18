@@ -34,7 +34,7 @@ templates = Jinja2Templates(directory=CLIENT_DIR)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
