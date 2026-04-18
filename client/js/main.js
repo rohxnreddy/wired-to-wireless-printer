@@ -85,14 +85,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     return pdf.getPage(1);
                 }).then(page => {
                     const viewport = page.getViewport({ scale: 1.0 });
-                    const context = pdfCanvas.getContext('2d');
-                    
-                    const containerHeight = 200;
-                    const scale = containerHeight / viewport.height;
+                    const containerHeight = 200; // preview container height in CSS pixels
+                    const devicePixelRatio = window.devicePixelRatio || 1;
+                    const scale = (containerHeight / viewport.height) * devicePixelRatio;
                     const scaledViewport = page.getViewport({ scale: scale });
-                    
-                    pdfCanvas.height = scaledViewport.height;
+
+                    const context = pdfCanvas.getContext('2d');
                     pdfCanvas.width = scaledViewport.width;
+                    pdfCanvas.height = scaledViewport.height;
+                    // Set CSS size to keep container dimensions consistent
+                    pdfCanvas.style.width = `${scaledViewport.width / devicePixelRatio}px`;
+                    pdfCanvas.style.height = `${scaledViewport.height / devicePixelRatio}px`;
                     
                     const renderContext = {
                         canvasContext: context,

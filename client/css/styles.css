@@ -138,6 +138,20 @@ header p {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    /* Ensure the canvas draws at native pixel density */
+    image-rendering: -webkit-optimize-contrast; /* Chrome/Safari */
+    image-rendering: crisp-edges;               /* Firefox */
+    image-rendering: pixelated;                 /* Edge */
+    will-change: transform;
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
 }
 
 #generic-preview {
