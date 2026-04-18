@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMessage = document.getElementById('status-message');
 
     let currentFile = null;
+    let totalPages = null;
 
     // Handle drag events
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Handle file input selection
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener('change', function () {
         handleFiles(this.files);
     });
 
@@ -50,12 +51,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const pageSelection = document.getElementById('page-selection');
+    const customPagesInput = document.getElementById('custom-pages-input');
+    const pagesSettingRow = document.getElementById('pages-setting-row');
+
+    // Handle page selection toggle
+    pageSelection.addEventListener('change', () => {
+        if (pageSelection.value === 'custom') {
+            customPagesInput.classList.remove('hidden');
+            customPagesInput.focus();
+        } else {
+            customPagesInput.classList.add('hidden');
+        }
+    });
+
+    removeBtn.addEventListener('click', () => {
+        currentFile = null;
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        uploadArea.classList.remove('hidden');
+        printBtn.disabled = true;
+
+        // Reset print settings
+        pageSelection.value = 'all';
+        customPagesInput.value = '';
+        customPagesInput.classList.add('hidden');
+        pagesSettingRow.classList.remove('hidden'); // Show for next file
+
+        hideStatus();
+    });
+
     function showFilePreview(file) {
         filenameDisplay.textContent = file.name;
         uploadArea.classList.add('hidden');
         filePreview.classList.remove('hidden');
         printBtn.disabled = false;
         hideStatus();
+
+        totalPages = null; // Reset for new file
+        pagesSettingRow.classList.remove('hidden'); // Default to show
 
         const imagePreview = document.getElementById('image-preview');
         const pdfCanvas = document.getElementById('pdf-canvas');
@@ -67,6 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreview.src = '';
 
         if (file.type.startsWith('image/')) {
+            totalPages = 1;
+            pagesSettingRow.classList.add('hidden'); // Hide for images
             const reader = new FileReader();
             reader.onload = (e) => {
                 imagePreview.src = e.target.result;
@@ -76,12 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (file.type === 'application/pdf') {
             const fileURL = URL.createObjectURL(file);
             pdfCanvas.classList.remove('hidden');
-            
+
             if (window.pdfjsLib) {
                 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                
+
                 const loadingTask = window.pdfjsLib.getDocument(fileURL);
                 loadingTask.promise.then(pdf => {
+                    totalPages = pdf.numPages;
+                    console.log('Document pages:', totalPages);
+
+                    // Hide pages setting if it's a 1-page PDF
+                    if (totalPages === 1) {
+                        pagesSettingRow.classList.add('hidden');
+                    }
+
                     return pdf.getPage(1);
                 }).then(page => {
                     const viewport = page.getViewport({ scale: 1.0 });
@@ -96,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Set CSS size to keep container dimensions consistent
                     pdfCanvas.style.width = `${scaledViewport.width / devicePixelRatio}px`;
                     pdfCanvas.style.height = `${scaledViewport.height / devicePixelRatio}px`;
-                    
+
                     const renderContext = {
                         canvasContext: context,
                         viewport: scaledViewport
@@ -115,34 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const pageSelection = document.getElementById('page-selection');
-    const customPagesInput = document.getElementById('custom-pages-input');
-
-    // Handle page selection toggle
-    pageSelection.addEventListener('change', () => {
-        if (pageSelection.value === 'custom') {
-            customPagesInput.classList.remove('hidden');
-            customPagesInput.focus();
-        } else {
-            customPagesInput.classList.add('hidden');
-        }
-    });
-
-    removeBtn.addEventListener('click', () => {
-        currentFile = null;
-        fileInput.value = '';
-        filePreview.classList.add('hidden');
-        uploadArea.classList.remove('hidden');
-        printBtn.disabled = true;
-        
-        // Reset print settings
-        pageSelection.value = 'all';
-        customPagesInput.value = '';
-        customPagesInput.classList.add('hidden');
-        
-        hideStatus();
-    });
-
     printBtn.addEventListener('click', async () => {
         if (!currentFile) return;
 
@@ -158,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData();
         formData.append('file', currentFile);
-        
+
         // Add page range if custom is selected
         if (pageSelection.value === 'custom') {
             const pages = customPagesInput.value.trim();
@@ -167,13 +183,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetPrintBtn(originalContent);
                 return;
             }
-            
-            // Basic validation for page range: digits, commas, and dashes only
+
+            // Advanced validation for page range: digits, commas, and dashes only
             const pageRangeRegex = /^[\d\s\-,]+$/;
             if (!pageRangeRegex.test(pages)) {
                 showStatus('Invalid page range format. Use numbers, commas, or dashes (e.g. 1-5, 8).', 'error');
                 resetPrintBtn(originalContent);
                 return;
+            }
+
+            // Check if pages are within document range (if totalPages is known)
+            if (totalPages !== null) {
+                const parts = pages.split(',').map(p => p.trim());
+                let outOfRange = false;
+                
+                for (const part of parts) {
+                    if (part.includes('-')) {
+                        const [start, end] = part.split('-').map(n => parseInt(n.trim()));
+                        if (start > totalPages || end > totalPages || start < 1 || end < 1) {
+                            outOfRange = true;
+                            break;
+                        }
+                    } else {
+                        const pageNum = parseInt(part);
+                        if (pageNum > totalPages || pageNum < 1) {
+                            outOfRange = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (outOfRange) {
+                    showStatus(`Enter a valid range from 1-${totalPages}`, 'error');
+                    resetPrintBtn(originalContent);
+                    return;
+                }
             }
             
             formData.append('pages', pages);

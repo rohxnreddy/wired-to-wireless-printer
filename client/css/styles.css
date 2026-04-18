@@ -228,7 +228,7 @@ header p {
 
 .primary-btn {
     background: var(--primary);
-    color: white;
+    color: #000000;
 }
 
 .primary-btn:hover:not(:disabled) {
