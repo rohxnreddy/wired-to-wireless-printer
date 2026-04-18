@@ -1,6 +1,6 @@
 import os
 import subprocess
-from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -37,7 +37,7 @@ async def root(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), pages: str = Form(None)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -50,7 +50,14 @@ async def upload_file(file: UploadFile = File(...)):
             
         # Send to printer via CUPS (lp command)
         try:
-            result = subprocess.run(["lp", file_path], capture_output=True, text=True, check=True)
+            # Build the lp command
+            cmd = ["lp"]
+            if pages:
+                # -P specifies page ranges (e.g., 1-3, 5, 7-10)
+                cmd.extend(["-P", pages])
+            cmd.append(file_path)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             print_status = f"Printed successfully: {result.stdout}"
         except subprocess.CalledProcessError as e:
             print_status = f"Print failed: {e.stderr}"

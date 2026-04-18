@@ -269,6 +269,87 @@ header p {
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+/* Print Settings */
+.print-settings {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.setting-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.setting-row label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-main);
+    padding-top: 12px;
+    min-width: 60px;
+}
+
+.setting-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--text-muted);
+    pointer-events: none;
+}
+
+.select-input, .text-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--text-main);
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.select-input {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 40px;
+}
+
+.select-input:hover, .text-input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.select-input:focus, .text-input:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.1);
+}
+
+.text-input::placeholder {
+    color: #555555;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }

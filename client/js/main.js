@@ -115,12 +115,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const pageSelection = document.getElementById('page-selection');
+    const customPagesInput = document.getElementById('custom-pages-input');
+
+    // Handle page selection toggle
+    pageSelection.addEventListener('change', () => {
+        if (pageSelection.value === 'custom') {
+            customPagesInput.classList.remove('hidden');
+            customPagesInput.focus();
+        } else {
+            customPagesInput.classList.add('hidden');
+        }
+    });
+
     removeBtn.addEventListener('click', () => {
         currentFile = null;
         fileInput.value = '';
         filePreview.classList.add('hidden');
         uploadArea.classList.remove('hidden');
         printBtn.disabled = true;
+        
+        // Reset print settings
+        pageSelection.value = 'all';
+        customPagesInput.value = '';
+        customPagesInput.classList.add('hidden');
+        
         hideStatus();
     });
 
@@ -139,6 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData();
         formData.append('file', currentFile);
+        
+        // Add page range if custom is selected
+        if (pageSelection.value === 'custom' && customPagesInput.value.trim()) {
+            formData.append('pages', customPagesInput.value.trim());
+        }
 
         try {
             const response = await fetch('/upload', {
