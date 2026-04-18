@@ -58,14 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
         hideStatus();
 
         const imagePreview = document.getElementById('image-preview');
-        const pdfPreview = document.getElementById('pdf-preview');
+        const pdfCanvas = document.getElementById('pdf-canvas');
         const genericPreview = document.getElementById('generic-preview');
 
         imagePreview.classList.add('hidden');
-        pdfPreview.classList.add('hidden');
+        pdfCanvas.classList.add('hidden');
         genericPreview.classList.add('hidden');
         imagePreview.src = '';
-        pdfPreview.src = '';
 
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
@@ -75,9 +74,39 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             reader.readAsDataURL(file);
         } else if (file.type === 'application/pdf') {
-            const fileURL = URL.createObjectURL(file) + '#view=FitH';
-            pdfPreview.src = fileURL;
-            pdfPreview.classList.remove('hidden');
+            const fileURL = URL.createObjectURL(file);
+            pdfCanvas.classList.remove('hidden');
+            
+            if (window.pdfjsLib) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                
+                const loadingTask = window.pdfjsLib.getDocument(fileURL);
+                loadingTask.promise.then(pdf => {
+                    return pdf.getPage(1);
+                }).then(page => {
+                    const viewport = page.getViewport({ scale: 1.0 });
+                    const context = pdfCanvas.getContext('2d');
+                    
+                    const containerHeight = 200;
+                    const scale = containerHeight / viewport.height;
+                    const scaledViewport = page.getViewport({ scale: scale });
+                    
+                    pdfCanvas.height = scaledViewport.height;
+                    pdfCanvas.width = scaledViewport.width;
+                    
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: scaledViewport
+                    };
+                    page.render(renderContext);
+                }).catch(err => {
+                    console.error('Error rendering PDF:', err);
+                    pdfCanvas.classList.add('hidden');
+                    genericPreview.classList.remove('hidden');
+                });
+            } else {
+                genericPreview.classList.remove('hidden');
+            }
         } else {
             genericPreview.classList.remove('hidden');
         }
