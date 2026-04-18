@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageSelection = document.getElementById('page-selection');
     const customPagesInput = document.getElementById('custom-pages-input');
     const pagesSettingRow = document.getElementById('pages-setting-row');
+    const pagesSettingsContainer = document.querySelector('.print-settings');
 
     // Handle page selection toggle
     pageSelection.addEventListener('change', () => {
@@ -71,38 +72,41 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreview.classList.add('hidden');
         uploadArea.classList.remove('hidden');
         printBtn.disabled = true;
-
+ 
         // Reset print settings
         pageSelection.value = 'all';
         customPagesInput.value = '';
         customPagesInput.classList.add('hidden');
-        pagesSettingRow.classList.remove('hidden'); // Show for next file
-
+        pagesSettingRow.classList.remove('hidden');
+        pagesSettingsContainer.classList.remove('hidden'); // Show for next file
+ 
         hideStatus();
     });
-
+ 
     function showFilePreview(file) {
         filenameDisplay.textContent = file.name;
         uploadArea.classList.add('hidden');
         filePreview.classList.remove('hidden');
         printBtn.disabled = false;
         hideStatus();
-
+ 
         totalPages = null; // Reset for new file
-        pagesSettingRow.classList.remove('hidden'); // Default to show
-
+        pagesSettingRow.classList.remove('hidden');
+        pagesSettingsContainer.classList.remove('hidden'); // Default to show
+ 
         const imagePreview = document.getElementById('image-preview');
         const pdfCanvas = document.getElementById('pdf-canvas');
         const genericPreview = document.getElementById('generic-preview');
-
+ 
         imagePreview.classList.add('hidden');
         pdfCanvas.classList.add('hidden');
         genericPreview.classList.add('hidden');
         imagePreview.src = '';
-
+ 
         if (file.type.startsWith('image/')) {
             totalPages = 1;
-            pagesSettingRow.classList.add('hidden'); // Hide for images
+            pagesSettingRow.classList.add('hidden');
+            pagesSettingsContainer.classList.add('hidden'); // Hide entire box (including separator)
             const reader = new FileReader();
             reader.onload = (e) => {
                 imagePreview.src = e.target.result;
@@ -112,20 +116,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (file.type === 'application/pdf') {
             const fileURL = URL.createObjectURL(file);
             pdfCanvas.classList.remove('hidden');
-
+ 
             if (window.pdfjsLib) {
                 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+ 
                 const loadingTask = window.pdfjsLib.getDocument(fileURL);
                 loadingTask.promise.then(pdf => {
                     totalPages = pdf.numPages;
                     console.log('Document pages:', totalPages);
-
+ 
                     // Hide pages setting if it's a 1-page PDF
                     if (totalPages === 1) {
                         pagesSettingRow.classList.add('hidden');
+                        pagesSettingsContainer.classList.add('hidden'); // Hide entire box
                     }
-
+ 
                     return pdf.getPage(1);
                 }).then(page => {
                     const viewport = page.getViewport({ scale: 1.0 });
