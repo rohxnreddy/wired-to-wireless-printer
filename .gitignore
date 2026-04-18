@@ -27,3 +27,8 @@ venv.bak/
 # Project specifics - ignore uploaded files but not the folder
 server/src/uploads/*
 !server/src/uploads/.gitkeep
+
+# Logs
+logs/
+server.log
+server.pid
