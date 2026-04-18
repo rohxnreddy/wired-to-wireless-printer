@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pageSelection = document.getElementById('page-selection');
     const customPagesInput = document.getElementById('custom-pages-input');
+    const duplexSelection = document.getElementById('duplex-selection');
 
     // Handle page selection toggle
     pageSelection.addEventListener('change', () => {
@@ -139,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pageSelection.value = 'all';
         customPagesInput.value = '';
         customPagesInput.classList.add('hidden');
+        duplexSelection.value = 'false';
         
         hideStatus();
     });
@@ -163,6 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pageSelection.value === 'custom' && customPagesInput.value.trim()) {
             formData.append('pages', customPagesInput.value.trim());
         }
+
+        // Add duplex setting (convert "true"/"false" string to boolean)
+        formData.append('duplex', duplexSelection.value === 'true');
 
         try {
             const response = await fetch('/upload', {

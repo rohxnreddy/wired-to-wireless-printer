@@ -278,16 +278,16 @@ header p {
 
 .setting-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 24px;
+    margin-bottom: 12px;
 }
 
 .setting-row label {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--text-main);
-    padding-top: 12px;
-    min-width: 60px;
+    min-width: 100px;
 }
 
 .setting-controls {
@@ -348,6 +348,74 @@ header p {
 
 .text-input::placeholder {
     color: #555555;
+}
+
+/* Checkbox Styling */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    gap: 12px;
+    padding: 8px 0;
+    position: relative;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox-custom {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.checkbox-container:hover .checkbox-custom {
+    border-color: var(--primary);
+}
+
+.checkbox-container input:checked ~ .checkbox-custom {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+}
+
+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkbox-custom::after {
+    display: block;
+}
+
+.checkbox-label {
+    font-size: 15px;
+    color: var(--text-main);
+    transition: color 0.2s ease;
+}
+
+.checkbox-container input:checked ~ .checkbox-label {
+    color: var(--primary);
 }
 
 @keyframes fadeIn {
