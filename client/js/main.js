@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             reader.readAsDataURL(file);
         } else if (file.type === 'application/pdf') {
-            const fileURL = URL.createObjectURL(file);
+            const fileURL = URL.createObjectURL(file) + '#view=FitH';
             pdfPreview.src = fileURL;
             pdfPreview.classList.remove('hidden');
         } else {
