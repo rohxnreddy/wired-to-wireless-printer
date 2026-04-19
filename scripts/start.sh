@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Navigate to project root (in case script is run from elsewhere)
-cd "$(dirname "$0")"
+# Navigate to project root
+cd "$(dirname "$0")/.."
 
 echo "--- Pulling latest changes ---"
 git pull

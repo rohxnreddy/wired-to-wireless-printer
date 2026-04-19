@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to project root
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 if [ -f "logs/server.pid" ]; then
     PID=$(cat logs/server.pid)

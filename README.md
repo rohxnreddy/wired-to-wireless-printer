@@ -36,8 +36,8 @@ A self-hosted, lightweight web server that turns any wired printer (connected vi
 2. **Run the start script**:
    The `start.sh` script will automatically create a virtual environment, install dependencies, and start the server in the background.
    ```bash
-   chmod +x start.sh
-   ./start.sh
+   chmod +x scripts/start.sh
+   ./scripts/start.sh
    ```
 
 3. **Check logs**:
@@ -56,6 +56,6 @@ Once the server is running, it will be accessible at `http://<your-ip>:8888`.
 
 To stop the background server, use the provided script:
 ```bash
-chmod +x stop.sh
-./stop.sh
+chmod +x scripts/stop.sh
+./scripts/stop.sh
 ```
