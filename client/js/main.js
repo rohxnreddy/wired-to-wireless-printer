@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeBtn = document.getElementById('remove-btn');
     const printBtn = document.getElementById('print-btn');
     const statusMessage = document.getElementById('status-message');
+    const barContainer = document.querySelector('.progress-bar-container');
+    const bar = document.getElementById('progress-bar');
 
     let currentFile = null;
     let totalPages = null;
@@ -233,25 +235,53 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('copies', (copies >= 1 && copies <= 10) ? copies : 1);
 
         try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload');
+
+                xhr.upload.addEventListener('loadstart', () => {
+                    barContainer.classList.remove('hidden');
+                    bar.style.width = '0%';
+                });
+
+                xhr.upload.addEventListener('progress', e => {
+                    if (e.lengthComputable) {
+                        bar.style.width = (e.loaded / e.total * 100) + '%';
+                    }
+                });
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve();
+                    } else {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            reject(result.detail || 'Failed to print file.');
+                        } catch (e) {
+                            reject('Failed to print file.');
+                        }
+                    }
+                };
+
+                xhr.onerror = () => {
+                    reject('Network error occurred. Please try again.');
+                };
+
+                xhr.send(formData);
             });
 
-            const result = await response.json();
-
-            if (response.ok) {
-                showStatus('File successfully sent to printer!', 'success');
-                // Reset after 3 seconds
-                setTimeout(() => {
-                    removeBtn.click();
-                }, 3000);
-            } else {
-                showStatus(result.detail || 'Failed to print file.', 'error');
-            }
+            showStatus('File successfully sent to printer!', 'success');
+            // Reset after 3 seconds
+            setTimeout(() => {
+                removeBtn.click();
+            }, 3000);
         } catch (error) {
-            showStatus('Network error occurred. Please try again.', 'error');
+            showStatus(typeof error === 'string' ? error : 'Network error occurred.', 'error');
         } finally {
+            setTimeout(() => {
+                barContainer.classList.add('hidden');
+                bar.style.width = '0%';
+            }, 500);
             resetPrintBtn(originalContent);
         }
     });
