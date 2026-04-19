@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customPagesInput = document.getElementById('custom-pages-input');
     const pagesSettingRow = document.getElementById('pages-setting-row');
     const pagesSettingsContainer = document.querySelector('.print-settings');
+    const copiesInput = document.getElementById('copies-input');
 
     // Handle page selection toggle
     pageSelection.addEventListener('change', () => {
@@ -79,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         customPagesInput.classList.add('hidden');
         pagesSettingRow.classList.remove('hidden');
         pagesSettingsContainer.classList.remove('hidden'); // Show for next file
+        copiesInput.value = '1';
  
         hideStatus();
     });
@@ -106,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (file.type.startsWith('image/')) {
             totalPages = 1;
             pagesSettingRow.classList.add('hidden');
-            pagesSettingsContainer.classList.add('hidden'); // Hide entire box (including separator)
             const reader = new FileReader();
             reader.onload = (e) => {
                 imagePreview.src = e.target.result;
@@ -128,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Hide pages setting if it's a 1-page PDF
                     if (totalPages === 1) {
                         pagesSettingRow.classList.add('hidden');
-                        pagesSettingsContainer.classList.add('hidden'); // Hide entire box
                     }
  
                     return pdf.getPage(1);
@@ -227,6 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             formData.append('pages', pages);
         }
+
+        // Always send copies count
+        const copies = parseInt(copiesInput.value, 10);
+        formData.append('copies', (copies >= 1 && copies <= 10) ? copies : 1);
 
         try {
             const response = await fetch('/upload', {

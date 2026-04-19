@@ -316,7 +316,7 @@ header p {
     pointer-events: none;
 }
 
-.select-input, .text-input {
+.select-input, .text-input, .number-input {
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
@@ -335,12 +335,12 @@ header p {
     padding-right: 40px;
 }
 
-.select-input:hover, .text-input:hover {
+.select-input:hover, .text-input:hover, .number-input:hover {
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.08);
 }
 
-.select-input:focus, .text-input:focus {
+.select-input:focus, .text-input:focus, .number-input:focus {
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.1);
@@ -348,6 +348,19 @@ header p {
 
 .text-input::placeholder {
     color: #555555;
+}
+
+.number-input {
+    width: 80px;
+    text-align: center;
+    -moz-appearance: textfield;
+    color-scheme: dark;
+}
+
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+    opacity: 1;
+    cursor: pointer;
 }
 
 /* Checkbox Styling */
