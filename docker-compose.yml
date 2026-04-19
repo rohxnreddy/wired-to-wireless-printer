@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  printer-web:
+    build: .
+    container_name: printer-web
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount the host's CUPS socket to allow the container to use the host's printers
+      - /var/run/cups/cups.sock:/var/run/cups/cups.sock
+      # Optional: Mount logs to host for easy viewing
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
