@@ -22,6 +22,5 @@ COPY . .
 # Expose port 8888 for the FastAPI app
 EXPOSE 8888
 
-# Command to run the application using uvicorn directly
-# This is more robust for Docker as it handles the module path correctly
+# Command to run the application using uvicorn
 CMD ["uvicorn", "server.src.app:app", "--host", "0.0.0.0", "--port", "8888"]
