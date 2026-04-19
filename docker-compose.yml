@@ -8,9 +8,9 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      # Mount the host's CUPS socket to allow the container to use the host's printers
       - /var/run/cups/cups.sock:/var/run/cups/cups.sock
-      # Optional: Mount logs to host for easy viewing
       - ./logs:/app/logs
     environment:
       - PYTHONUNBUFFERED=1
+      - PRINTER=HP_LaserJet_Professional_M1136_MFP
+      - CUPS_SERVER=/var/run/cups/cups.sock
