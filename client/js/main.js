@@ -69,6 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function updateAllOptionText(count) {
+        const allOption = pageSelection.querySelector('option[value="all"]');
+        if (allOption) {
+            allOption.textContent = (count && count > 1) ? `All (1-${count})` : '1 Page';
+        }
+    }
+
     removeBtn.addEventListener('click', () => {
         currentFile = null;
         fileInput.value = '';
@@ -78,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
  
         // Reset print settings
         pageSelection.value = 'all';
+        updateAllOptionText(null);
         customPagesInput.value = '';
         customPagesInput.classList.add('hidden');
         pagesSettingRow.classList.remove('hidden');
@@ -109,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
  
         if (file.type.startsWith('image/')) {
             totalPages = 1;
+            updateAllOptionText(totalPages);
             pagesSettingRow.classList.add('hidden');
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -127,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingTask.promise.then(pdf => {
                     totalPages = pdf.numPages;
                     console.log('Document pages:', totalPages);
+                    updateAllOptionText(totalPages);
  
                     // Hide pages setting if it's a 1-page PDF
                     if (totalPages === 1) {
