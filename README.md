@@ -43,4 +43,4 @@ A self-hosted, lightweight web server that turns any wired printer (connected vi
 
 Once the server is running, it will be accessible at `http://<your-ip>:8888`. 
 
-**Tip:** Generate a QR code pointing to this URL and stick it on your printer for easy access!
+**Tip:** Generate a QR code pointing to this URL and stick it on your printer for easy access! 
